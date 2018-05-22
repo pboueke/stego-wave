@@ -1,5 +1,0 @@
-* Stego-Wave 
-
-** Usage
-
-** Installation

@@ -1,11 +1,13 @@
 ;;;; stego-wave.lisp
 
-(in-package #:stego-wave
-            #:apply-argv)
+(in-package #:stego-wave)
+(use-package :apply-argv)
 
-(parse-argv '("--foo" "bar"
+(apply-argv:parse-argv '("--foo" "bar"
               "--bar=qwe"
               "--qwe"
               "--no-xyz"
               "more" "stuff" "here"))
 
+(defun main ()
+    (format t "hello" ))

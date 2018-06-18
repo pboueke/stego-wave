@@ -1,4 +1,6 @@
 ;;;; package.lisp
 
 (defpackage #:stego-wave
-  (:use #:cl))
+  (:use #:cl)
+  (:export 
+    :main))

@@ -9,9 +9,20 @@ sbcl --load stego-wave.asd \
 		--eval '(quit)'
 ```
 
-## load
+## run
+
+Runs the compiled binary. I have not yet found how to use a relative path for the generated binary.
+
+Run task `build` before this
 
 ```bash
-sbcl --load stego-wave.asd \
-         --eval '(ql:quickload :stego-wave)'
+/home/jawa/.cache/common-lisp/sbcl-1.3.1.debian-linux-x64/home/jawa/quicklisp/local-projects/stego-wave/stegowave.app "${@:1}"
+```
+
+## echo
+
+Just a syntax example for future reference...
+
+```bash
+echo "${@:1}"
 ```

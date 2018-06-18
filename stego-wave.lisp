@@ -3,11 +3,21 @@
 (in-package #:stego-wave)
 (use-package :apply-argv)
 
-(apply-argv:parse-argv '("--foo" "bar"
-              "--bar=qwe"
-              "--qwe"
-              "--no-xyz"
-              "more" "stuff" "here"))
+;;; General macros
+
+(defmacro while (condition &body body)
+    `(loop while ,condition
+        do (progn ,@body)))
+
+;;; Utilities
+
+(defun getparam (keyname params)
+    (nth (+ 1 (position keyname params)) params))
+
+;;; Entry point
 
 (defun main ()
-    (format t "hello" ))
+    (print sb-ext:*posix-argv*)
+    (defparameter parsedparams (apply-argv:parse-argv sb-ext:*posix-argv*))
+    (print parsedparams)
+    (format t "~t ~%" (getparam :host parsedparams)))

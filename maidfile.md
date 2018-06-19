@@ -18,11 +18,3 @@ Run task `build` before this
 ```bash
 ~/.quicklisp/local-projects/stego-wave/stegowave.app "${@:1}"
 ```
-
-## echo
-
-Just a syntax example for future reference...
-
-```bash
-echo "${@:1}"
-```

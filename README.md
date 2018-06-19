@@ -1,6 +1,20 @@
-# stego-wave
+# [WIP] stego-wave
 
 Simple tool for .wav LSB steganography.
+
+## Usage
+
+* ```--write```, ```--read```
+    * Operation type. One, and only one, of those flags bust be used, either to write a steganographic object or to read from one.
+
+* ```host```
+    * The path to the ```.wav``` file used as a host, i.e., the file containing the hidden data. Must be used for reading from a file or writing to one.
+
+* ```result```
+    * The path to the file containing the result of the operation. For write operations, the stego object and, for read operations, the hidden message.
+
+* ```message```
+    * Used only for write operations. The path to the file containing the message you want to hide.
 
 ### Setup
 

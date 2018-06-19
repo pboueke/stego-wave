@@ -1,7 +1,13 @@
 # stego-wave
 
-Simple tool for .wav steganography.
+Simple tool for .wav LSB steganography.
 
 ### Setup
 
-You should have ```Quicklisp``` installed. The project was created using ```quickload```, and should be located somewhere where ```ASDF``` is able to find it, such as the default project directory used by ```Quicklisp``` (~/quicklisp/local-projects/). Then, load it as you would do any other project using ```(ql:quickload "stego-wave")```.
+If you don't have common-lisp installed and is using linux, follow these steps for a quick setup:
+
+* install ```sbcl```
+* install [quicklisp](https://www.quicklisp.org/beta/)
+* clone this repository at ```~/.quicklisp/local-projects```
+
+In theory, you should be ready to go. For additional ease of use, install [maid](https://github.com/egoist/maid) and use the ```maidfile.md``` to run development tasks.

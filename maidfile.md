@@ -11,12 +11,12 @@ sbcl --load stego-wave.asd \
 
 ## run
 
-Runs the compiled binary. I have not yet found how to use a relative path for the generated binary.
+Runs the compiled binary.
 
 Run task `build` before this
 
 ```bash
-/home/jawa/.cache/common-lisp/sbcl-1.3.1.debian-linux-x64/home/jawa/quicklisp/local-projects/stego-wave/stegowave.app "${@:1}"
+~/.quicklisp/local-projects/stego-wave/stegowave.app "${@:1}"
 ```
 
 ## echo

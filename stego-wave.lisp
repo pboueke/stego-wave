@@ -7,10 +7,6 @@
 
 (defparameter header-size 64)
 
-;;; Macros
-
-(defmacro concat-string (&rest strings) `(concatenate 'string ,@strings) )
-
 ;;; Parameters Utils
 
 (defun get-param (keyname params)
@@ -72,8 +68,9 @@
             (format t "|* Partial parsed message size: ~a bytes ~%" read-counter))
         (if (not inbyte)
             list
-            (get-bits-from-file in (append list 
-                (decimal-to-binary-list inbyte)) (+ 1 read-counter)))))
+            (get-bits-from-file in 
+                (append list (decimal-to-binary-list inbyte)) 
+                (+ 1 read-counter)))))
 
 (defun parse-wav-header (in out)
     (let ((counter  0)
@@ -83,12 +80,12 @@
             (progn
                 (write-byte inbyte out)
                 (cond 
-                    ((or (eq counter 22) (eq counter 23)) 
-                        (setq channels (concat-string (make-string inbyte) channels)))
+                    ((or (eq counter 22) (eq counter 23))
+                        (progn 
+                            (setq channels (concatenate 'string (write-to-string inbyte) channels))))
                     ((> counter header-size)
-                        (return-from parse-wav-header 
-                            (parse-integer channels :radix 16))))
-                (+ counter 1)))))
+                        (return-from parse-wav-header (parse-integer channels :radix 16))))
+                (setq counter (+ counter 1))0))))
 
 ;;; Stego utils
 
@@ -109,7 +106,7 @@
             (setq channels-number (parse-wav-header original new))
             (format t "|*Number of channels: ~a ~%" channels-number))
         (close original)
-        (close new))
+        (close new)))
 
 (defun read-op (params)
     (format t "=> Starting READ operation ~%"))

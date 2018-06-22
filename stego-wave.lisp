@@ -73,18 +73,13 @@
                 (+ 1 read-counter)))))
 
 (defun parse-wav-header (in out)
-    (let ((counter  0)
-          (channels ""))
+    (let ((counter  0))
         (format t "=> Parsing file header ~%")
         (loop for inbyte = (read-byte in nil) while inbyte do
             (progn
                 (write-byte inbyte out)
-                (cond 
-                    ((or (eq counter 22) (eq counter 23))
-                        (progn 
-                            (setq channels (concatenate 'string (write-to-string inbyte) channels))))
-                    ((> counter *header-size*)
-                        (return-from parse-wav-header (parse-integer channels :radix 16))))
+                (if (> counter *header-size*)
+                    (return-from parse-wav-header))
                 (setq counter (+ counter 1))0))))
 
 (defun write-message-bit (byte bit out)
@@ -93,9 +88,8 @@
         (write-byte (ovewrite-lsb byte (random 2)) out)))
         
 
-(defun write-message (message in out channels)
+(defun write-message (message in out)
     (let ((counter  0)
-          (message-bit nil)
           (message-size (list-length message)))
         (format t "=> Writing data ~%")
         (loop for inbyte = (read-byte in nil) while inbyte do
@@ -122,9 +116,8 @@
               (channels-number 0))
             (close message)
             (format t " * Total parsed message size: ~a bytes ~%" (list-length content))
-            (setq channels-number (parse-wav-header original new))
-            (format t " * Number of channels: ~a ~%" channels-number)
-            (write-message content original new channels-number))
+            (parse-wav-header original new)
+            (write-message content original new))
         (close original)
         (close new)))
 

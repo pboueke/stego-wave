@@ -46,6 +46,19 @@ In theory, you should be ready to go. For additional ease of use, install [maid]
 
 ### Header:
 
-- [ ] Detect and handle RIFX files. Currently only workinf with RIFF
+- [ ] Detect and handle RIFX files. Currently only working with RIFF
 - [ ] Detect bts per sample, so that files with lower bits per sample get more capacity. Currently assuming all files have 16 bits per sample.
 - [ ] Detect the exact size of header, so that we can start writing the message exactly after the header is read. Currently assumig headers of 64 bytes.
+
+### General
+
+- [ ] Generalize to work with any RIFF file. Currently assumes only .WAV files.
+- [ ] Add more steganographic methods, such as frequency spread,
+
+## References
+
+1. [WAVE Audio File Format](https://www.loc.gov/preservation/digital/formats/fdd/fdd000001.shtml), Library of Congress
+
+2. [WAVE PCM soundfile format, soundfile++](http://soundfile.sapp.org/doc/WaveFormat/): A Soundfile Reading/Writing Library in C++
+
+3. Hiding Data in Wave Files. International Conference in Recent Trends in Information Technology and Computer Science (ICRTITCS - 2012). By Pushpa Aigal, Pramod Vasambekar.

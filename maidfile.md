@@ -15,7 +15,7 @@ sbcl    --non-interactive \
 Runs the compiled binary.
 
 ```bash
-~/.quicklisp/local-projects/stego-wave/stegowave.app "${@:1}"
+~/.quicklisp/local-projects/stego-wave/stegowave "${@:1}"
 ```
 
 ## bar
@@ -25,7 +25,7 @@ Build and run the compiled binary.
 Run task `build` before this
 
 ```bash
-~/.quicklisp/local-projects/stego-wave/stegowave.app "${@:1}"
+~/.quicklisp/local-projects/stego-wave/stegowave "${@:1}"
 ```
 
 ## bar:write
@@ -33,5 +33,13 @@ Run task `build` before this
 Run task `build` before this
 
 ```bash
-~/.quicklisp/local-projects/stego-wave/stegowave.app --host=sounds/smashingbaby.wav --message=sounds/test.txt --result=sounds/testresult.wav --write
+~/.quicklisp/local-projects/stego-wave/stegowave --host=sounds/smashingbaby.wav --message=sounds/test.txt --result=sounds/testresult.wav --write
+```
+
+## bar:read
+
+Run task `build` before this
+
+```bash
+~/.quicklisp/local-projects/stego-wave/stegowave --host=sounds/testresult.wav --result=sounds/recovered.txt --read
 ```

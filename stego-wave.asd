@@ -2,7 +2,7 @@
 
 (asdf:defsystem #:stego-wave
   :build-operation "program-op"
-  :build-pathname "stegowave.app"
+  :build-pathname "stegowave"
   :entry-point "stego-wave:main"
   :description "Simple tool for .wav steganography."
   :author "pboueke"

@@ -41,3 +41,11 @@ If you don't have common-lisp installed and is using linux, follow these steps f
 * clone this repository at ```~/.quicklisp/local-projects```
 
 In theory, you should be ready to go. For additional ease of use, install [maid](https://github.com/egoist/maid) and use the ```maidfile.md``` to run development tasks.
+
+## Roadmap
+
+### Header:
+
+- [ ] Detect and handle RIFX files. Currently only workinf with RIFF
+- [ ] Detect bts per sample, so that files with lower bits per sample get more capacity. Currently assuming all files have 16 bits per sample.
+- [ ] Detect the exact size of header, so that we can start writing the message exactly after the header is read. Currently assumig headers of 64 bytes.

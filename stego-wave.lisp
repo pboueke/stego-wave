@@ -55,10 +55,16 @@
 
 ;;; Data Utils
 
+(defun decimal-to-8bit-array (n)
+    (let ((arr (decimal-to-binary-list n)))
+        (while (< (list-length arr) 8)
+            (setq arr (append '(0) arr)))
+        arr))
+
 (defun decimal-to-binary-list (n)
     (cond ((= n 0) (list 0))
-        ((= n 1) (list 1))
-        (t (nconc (decimal-to-binary-list (truncate n 2)) (list (mod n 2))))))
+          ((= n 1) (list 1))
+          (t (nconc (decimal-to-binary-list (truncate n 2)) (list (mod n 2))))))
 
 (defun calculate-decimal (dec mult bin)
     (if bin 
@@ -71,7 +77,7 @@
 (defun get-decimal-from-binary-list (bin)
     (calculate-decimal 0 1 bin))
 
-(defun ovewrite-lsb (inbyte inbit)
+(defun overwrite-lsb (inbyte inbit)
     "Overwrites the last bit from a byte"
     (if (eq (mod inbyte 2) 0)
         (if (eq inbit 0)
@@ -95,7 +101,7 @@
         (if (not inbyte)
             list
             (get-bits-from-file in 
-                (append list (decimal-to-binary-list inbyte)) 
+                (append list (decimal-to-8bit-array inbyte)) 
                 (+ 1 read-counter)))))
 
 (defun parse-wav-header (in out)
@@ -105,30 +111,50 @@
         (loop for inbyte = (read-byte in nil) while inbyte do
             (progn
                 (when out (write-byte inbyte out))
-                (if (> counter *header-size*) (return-from parse-wav-header))
-                (setq counter (+ counter 1))))))
+                (setq counter (+ counter 1))
+                (if (> counter *header-size*) (return-from parse-wav-header))))))
+
+(defun parse-message-header (in)
+    "Reads the first *message-header-size* bits and returns the message-header (size) as a decimal"
+    (let ((counter 0) (parsed 0) (header '()))
+        (loop for inbyte = (read-byte in nil) while inbyte do
+            (progn
+                (setq counter (+ 1 counter))
+                (when (eq 0 (mod counter 2))
+                    (if (>= parsed *message-header-size*)
+                            (return-from parse-message-header 
+                                (get-decimal-from-binary-list header))
+                            (progn
+                                (format t "~a ~%" (get-lsb inbyte))
+                                (setq header (append header (list (get-lsb inbyte))))
+                                (setq parsed (+ 1 parsed)))))))))
+
+(defun write-message-header (message in out)
+    "Writes the size of the message at the first *message-header-size* available bits"
+    (let ((counter 0) (written 0)
+          (message-header (decimal-to-binary-list (list-length message))))
+        (while (< (list-length message-header) *message-header-size*) 
+            (setq message-header (append '(0) message-header)))
+        (loop for inbyte = (read-byte in nil) while inbyte do
+            (progn
+                (setq counter (+ 1 counter))
+                (when (eq 0 (mod counter 2))
+                    (if (>= written *message-header-size*)
+                        (progn 
+                            (return-from write-message-header))
+                        (progn 
+                            ;(format t "~a ~%" (car message-header))
+                            (write-byte (overwrite-lsb inbyte (car message-header)) out)
+                            (setq written (+ 1 written))
+                            (setq message-header (cdr message-header)))))))))
 
 (defun write-message-bit (byte message out)
     "Writes a byte to a file overwriting its LSB using the first bit of a bit array message"
     (let ((bit (car message)))
         (if bit
-            (write-byte (ovewrite-lsb byte bit) out)
-            (write-byte (ovewrite-lsb byte (random 2)) out))
+            (write-byte (overwrite-lsb byte bit) out)
+            (write-byte (overwrite-lsb byte (random 2)) out))
         (cdr message)))
-
-(defun write-message-header (message in out)
-    (let ((counter 0) 
-          (message-header (decimal-to-binary-list (list-length message))))
-        (while (< (list-length message-header) *message-header-size*) 
-            (setq message-header (append '(0) message-header)))
-        (loop for inbyte = (read-byte in nil) while inbyte do
-            (if (> counter *message-header-size*)
-                (return-from write-message-header)
-                (progn 
-                    (write-byte (ovewrite-lsb inbyte (car message-header)) out)
-                    (setq message-header (cdr message-header))
-                    (setq counter (+ 1 counter)))))))
-
 
 (defun write-message (message in out)
     "Writes a message using the LSB method on a .WAV file"
@@ -143,15 +169,22 @@
         (if (> counter message-size) 
             (error "Message size larger than host capacity")))))
 
-(defun read-message (in out)
+(defun read-message (size in out)
     "Reads an inputed .wav file and writes the hidden message to an out file using the LSB method"
-    (let ((outbyte '()))
+    (let ((counter 0) (parsed 0) (outbyte (list)))
+        (format t " * Message size: ~a bits~%" size)
         (loop for inbyte = (read-byte in nil) while inbyte do
             (progn 
-                (nconc outbyte (get-lsb inbyte))
+                (when (eq 0(mod counter 2))
+                    (setq outbyte (append outbyte (list (get-lsb inbyte))))
+                    (setq parsed (+ 1 parsed)))
                 (when (eq 0 (mod (list-length outbyte) 8))
+                    ;(format t "Outbyte: ~a ~%" (get-decimal-from-binary-list outbyte))
                     (write-byte (get-decimal-from-binary-list outbyte) out)
-                    (setq outbyte '()))))))
+                    (setq outbyte (list))
+                    (when (> parsed size)
+                        (return-from read-message)))
+                (setq counter (+ 1 counter))))))
 
 ;;; Stego utils
 
@@ -168,7 +201,7 @@
                     :if-exists :supersede)))
         (let ((content (get-bits-from-file message '() 0)))
             (close message)
-            (format t " * Total parsed message size: ~a bytes ~%" (list-length content))
+            (format t " * Total parsed message size: ~a bits ~%" (list-length content))
             (parse-wav-header original new)
             (write-message content original new))
         (close original)
@@ -177,14 +210,14 @@
 (defun read-op (params)
     "The read operation function"
     (format t "=> Starting READ operation ~%")
-    (let ((original (open (get-param :host params) 
+    (let ((original (open (get-param :host params)
                     :element-type '(unsigned-byte 8)))
          (message (open (get-param :result params) 
                     :element-type '(unsigned-byte 8)
                     :direction :output 
                     :if-exists :supersede)))
         (parse-wav-header original nil)
-        (read-message original message)
+        (read-message (parse-message-header original) original message)
         (close original)
         (close message)))
 
@@ -197,4 +230,3 @@
         (write-op *parsedparams*)
         (read-op *parsedparams*))
     (format t "=> All done!~%"))
-    

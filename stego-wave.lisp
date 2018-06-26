@@ -110,9 +110,9 @@
         (format t "=> Parsing file header ~%")
         (loop for inbyte = (read-byte in nil) while inbyte do
             (progn
-                (when out (write-byte inbyte out))
+                (if out (write-byte inbyte out))
                 (setq counter (+ counter 1))
-                (if (> counter *header-size*) (return-from parse-wav-header))))))
+                (if (>= counter *header-size*) (return-from parse-wav-header))))))
 
 (defun parse-message-header (in)
     "Reads the first *message-header-size* bits and returns the message-header (size) as a decimal"
@@ -125,7 +125,8 @@
                             (return-from parse-message-header 
                                 (get-decimal-from-binary-list header))
                             (progn
-                                (format t "~a ~%" (get-lsb inbyte))
+                                (format t "v B ~a ~%" inbyte)
+                                (format t "at P ~a ~%" (file-position in))
                                 (setq header (append header (list (get-lsb inbyte))))
                                 (setq parsed (+ 1 parsed)))))))))
 
@@ -138,15 +139,14 @@
         (loop for inbyte = (read-byte in nil) while inbyte do
             (progn
                 (setq counter (+ 1 counter))
-                (when (eq 0 (mod counter 2))
-                    (if (>= written *message-header-size*)
-                        (progn 
-                            (return-from write-message-header))
-                        (progn 
-                            ;(format t "~a ~%" (car message-header))
-                            (write-byte (overwrite-lsb inbyte (car message-header)) out)
-                            (setq written (+ 1 written))
-                            (setq message-header (cdr message-header)))))))))
+                (if (eq 0 (mod counter 2))
+                    (progn 
+                        (write-byte (overwrite-lsb inbyte (car message-header)) out)
+                        (setq written (+ 1 written))
+                        (setq message-header (cdr message-header))
+                        (if (>= written *message-header-size*) (return-from write-message-header)))
+                    (write-byte inbyte out))))))
+
 
 (defun write-message-bit (byte message out)
     "Writes a byte to a file overwriting its LSB using the first bit of a bit array message"
@@ -160,7 +160,6 @@
     "Writes a message using the LSB method on a .WAV file"
     (let ((counter  0) (message-size (list-length message)))
         (format t "=> Writing data ~%")
-        (write-message-header message in out)
         (loop for inbyte = (read-byte in nil) while inbyte do
             (progn
                 (if (eq 0 (mod counter 2))
@@ -203,6 +202,7 @@
             (close message)
             (format t " * Total parsed message size: ~a bits ~%" (list-length content))
             (parse-wav-header original new)
+            (write-message-header content original new)
             (write-message content original new))
         (close original)
         (close new)))

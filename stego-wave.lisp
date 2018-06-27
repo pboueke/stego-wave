@@ -160,14 +160,14 @@
 
 (defun write-message (message in out)
     "Writes a message using the LSB method on a .WAV file"
-    (let ((counter  0) (message-size (list-length message)))
+    (let ((counter 0) (message-size (list-length message)))
         (format t "=> Writing data ~%")
         (loop for inbyte = (read-byte in nil) while inbyte do
             (progn
+                (setq counter (+ 1 counter))
                 (if (eq 0 (mod counter 2))
                     (setq message (write-message-bit inbyte message out))
-                    (write-byte inbyte out))
-                (setq counter (+ 1 counter))))
+                    (write-byte inbyte out))))
         (if (> message-size (/ counter 2))
             (error "Message size ~d larger than host capacity ~d" message-size counter))))
 
@@ -177,6 +177,7 @@
         (format t " * Message size: ~a bits~%" size)
         (loop for inbyte = (read-byte in nil) while inbyte do
             (progn 
+                (setq counter (+ 1 counter))
                 (when (eq 0(mod counter 2))
                     (setq outbyte (append outbyte (list (get-lsb inbyte))))
                     (setq parsed (+ 1 parsed)))
@@ -184,8 +185,7 @@
                     (write-byte (get-decimal-from-binary-list outbyte) out)
                     (setq outbyte (list))
                     (when (>= parsed size)
-                        (return-from read-message)))
-                (setq counter (+ 1 counter))))))
+                        (return-from read-message)))))))
 
 ;;; Stego utils
 

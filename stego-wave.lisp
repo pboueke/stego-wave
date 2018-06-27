@@ -56,17 +56,20 @@
 ;;; Data Utils
 
 (defun decimal-to-8bit-array (n)
+    "Generates an 8bit representation of a decimal"
     (let ((arr (decimal-to-binary-list n)))
         (while (< (list-length arr) 8)
             (setq arr (append '(0) arr)))
         arr))
 
 (defun decimal-to-binary-list (n)
+    "Generates an binary array representation of a decimal"
     (cond ((= n 0) (list 0))
           ((= n 1) (list 1))
           (t (nconc (decimal-to-binary-list (truncate n 2)) (list (mod n 2))))))
 
 (defun calculate-decimal (dec mult bin)
+    "Recursively calculates a 'dec'imal number given a 'bin'ary array"
     (if bin 
         (calculate-decimal 
             (+ dec (* (car (reverse bin)) mult))
@@ -142,7 +145,8 @@
                         (write-byte (overwrite-lsb inbyte (car message-header)) out)
                         (setq written (+ 1 written))
                         (setq message-header (cdr message-header))
-                        (if (>= written *message-header-size*) (return-from write-message-header)))
+                        (if (>= written *message-header-size*) 
+                            (return-from write-message-header)))
                     (write-byte inbyte out))))))
 
 
@@ -177,7 +181,6 @@
                     (setq outbyte (append outbyte (list (get-lsb inbyte))))
                     (setq parsed (+ 1 parsed)))
                 (when (and (eq 0 (mod (list-length outbyte) 8)) (not (eq (list-length outbyte) 0)))
-                    ;(format t "Outbyte: ~a ~%" (get-decimal-from-binary-list outbyte))
                     (write-byte (get-decimal-from-binary-list outbyte) out)
                     (setq outbyte (list))
                     (when (>= parsed size)

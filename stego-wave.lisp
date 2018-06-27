@@ -121,14 +121,12 @@
             (progn
                 (setq counter (+ 1 counter))
                 (when (eq 0 (mod counter 2))
-                    (if (>= parsed *message-header-size*)
-                            (return-from parse-message-header 
-                                (get-decimal-from-binary-list header))
-                            (progn
-                                (format t "v B ~a ~%" inbyte)
-                                (format t "at P ~a ~%" (file-position in))
-                                (setq header (append header (list (get-lsb inbyte))))
-                                (setq parsed (+ 1 parsed)))))))))
+                    (setq header (append header (list (get-lsb inbyte))))
+                    (setq parsed (+ 1 parsed)))
+                (if (>= parsed *message-header-size*)
+                        (return-from parse-message-header (get-decimal-from-binary-list header)))))))
+
+                                
 
 (defun write-message-header (message in out)
     "Writes the size of the message at the first *message-header-size* available bits"
@@ -164,9 +162,10 @@
             (progn
                 (if (eq 0 (mod counter 2))
                     (setq message (write-message-bit inbyte message out))
+                    (write-byte inbyte out))
                 (setq counter (+ 1 counter))))
-        (if (> counter message-size) 
-            (error "Message size larger than host capacity")))))
+        (if (> message-size (/ counter 2))
+            (error "Message size ~d larger than host capacity ~d" message-size counter))))
 
 (defun read-message (size in out)
     "Reads an inputed .wav file and writes the hidden message to an out file using the LSB method"
@@ -177,11 +176,11 @@
                 (when (eq 0(mod counter 2))
                     (setq outbyte (append outbyte (list (get-lsb inbyte))))
                     (setq parsed (+ 1 parsed)))
-                (when (eq 0 (mod (list-length outbyte) 8))
+                (when (and (eq 0 (mod (list-length outbyte) 8)) (not (eq (list-length outbyte) 0)))
                     ;(format t "Outbyte: ~a ~%" (get-decimal-from-binary-list outbyte))
                     (write-byte (get-decimal-from-binary-list outbyte) out)
                     (setq outbyte (list))
-                    (when (> parsed size)
+                    (when (>= parsed size)
                         (return-from read-message)))
                 (setq counter (+ 1 counter))))))
 

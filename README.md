@@ -1,4 +1,4 @@
-# [WIP] stego-wave
+# stego-wave
 
 Simple tool for .wav LSB steganography.
 
@@ -47,7 +47,7 @@ In theory, you should be ready to go. For additional ease of use, install [maid]
 ### Header:
 
 - [ ] Detect and handle RIFX files. Currently only working with RIFF
-- [ ] Detect bts per sample, so that files with lower bits per sample get more capacity. Currently assuming all files have 16 bits per sample.
+- [ ] Detect bits per sample, so that files with lower bits per sample get more capacity. Currently assuming all files have 16 bits per sample.
 - [ ] Detect the exact size of header, so that we can start writing the message exactly after the header is read. Currently assumig headers of 64 bytes.
 
 ### General

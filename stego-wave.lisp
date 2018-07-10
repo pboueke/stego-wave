@@ -96,16 +96,17 @@
 
 ;;;; File Utils
 
-(defun get-bits-from-file(in list read-counter)
+(defun get-bits-from-file(in)
     "Returns the contents of a file as a binary list"
-    (let ((inbyte (read-byte in nil)))
-        (if (eq 0 (mod read-counter (* 1024 1)))
-            (format t " * Partial parsed message size: ~a bytes ~%" read-counter))
-        (if (not inbyte)
-            list
-            (get-bits-from-file in 
-                (append list (decimal-to-8bit-array inbyte)) 
-                (+ 1 read-counter)))))
+    (let ((bin '()) (counter 0))
+        (loop for inbyte = (read-byte in nil) while inbyte do
+            (progn 
+                (if (eq 0 (mod counter (* 1024 1)))
+                    (format t " * Partial parsed message size: ~a bytes ~%" counter))
+                (setq bin (nconc bin (decimal-to-8bit-array inbyte)))
+                (setq counter (+ counter 1))))
+        bin))
+
 
 (defun parse-wav-header (in out)
     "Parses the header of a .WAV file and wtites it to another empty file"
@@ -200,7 +201,7 @@
                     :element-type '(unsigned-byte 8)
                     :direction :output 
                     :if-exists :supersede)))
-        (let ((content (get-bits-from-file message '() 0)))
+        (let ((content (get-bits-from-file message)))
             (close message)
             (format t " * Total parsed message size: ~a bits ~%" (list-length content))
             (parse-wav-header original new)

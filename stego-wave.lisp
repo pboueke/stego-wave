@@ -116,7 +116,7 @@
             (progn
                 (if out (write-byte inbyte out))
                 (setq counter (+ counter 1))
-                (if (>= counter *header-size*) (return-from parse-wav-header))))))
+                (if (> counter *header-size*) (return-from parse-wav-header))))))
 
 (defun parse-message-header (in)
     "Reads the first *message-header-size* bits and returns the message-header (size) as a decimal"

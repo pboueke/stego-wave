@@ -55,6 +55,10 @@ In theory, you should be ready to go. For additional ease of use, install [maid]
 - [ ] Generalize to work with any RIFF file. Currently assumes only .WAV files.
 - [ ] Add more steganographic methods, such as frequency spread,
 
+### Bugs:
+
+- [ ] SBCL will fail for large message sizes (error: ```Heap exhausted, game over.```). The program should be refactored to write the message as it reads it from the file, which would be the proper Lisp way of doing this.
+
 ## References
 
 1. [WAVE Audio File Format](https://www.loc.gov/preservation/digital/formats/fdd/fdd000001.shtml), Library of Congress

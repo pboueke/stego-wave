@@ -55,6 +55,10 @@
 
 ;;; Data Utils
 
+(defun flatten (ls)
+  (labels ((mklist (x) (if (listp x) x (list x))))
+    (mapcan #'(lambda (x) (if (atom x) (mklist x) (flatten x))) ls)))
+
 (defun decimal-to-8bit-array (n)
     "Generates an 8bit representation of a decimal"
     (let ((arr (decimal-to-binary-list n)))
@@ -99,14 +103,10 @@
 (defun get-bits-from-file(in)
     "Returns the contents of a file as a binary list"
     (let ((bin '()) (counter 0))
-        (loop for inbyte = (read-byte in nil) while inbyte do
-            (progn 
-                (if (eq 0 (mod counter (* 1024 1)))
-                    (format t " * Partial parsed message size: ~a bytes ~%" counter))
-                (setq bin (nconc bin (decimal-to-8bit-array inbyte)))
-                (setq counter (+ counter 1))))
-        bin))
-
+        (loop for inbyte = (read-byte in nil)
+              while inbyte
+              collect (decimal-to-8bit-array inbyte) into res
+              finally (return (flatten res)))))
 
 (defun parse-wav-header (in out)
     "Parses the header of a .WAV file and wtites it to another empty file"
